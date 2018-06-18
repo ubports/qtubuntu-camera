@@ -41,7 +41,7 @@ public:
     MapMode mapMode() const { return NotMapped; }
     uchar *map(MapMode mode, int *numBytes, int *bytesPerLine)
     {
-        qDebug() << Q_FUNC_INFO;
+        qCritical() << Q_FUNC_INFO;
         Q_UNUSED(mode);
         Q_UNUSED(numBytes);
         Q_UNUSED(bytesPerLine);
@@ -50,7 +50,7 @@ public:
 
     void unmap()
     {
-        qDebug() << Q_FUNC_INFO;
+        qCritical() << Q_FUNC_INFO;
     }
 
     QVariant handle() const
@@ -109,7 +109,7 @@ void AalVideoRendererControl::startPreview()
         return;
     }
     if (!m_service->androidControl()) {
-        qWarning() << "Can't start preview without a CameraControl";
+        qCritical() << "Can't start preview without a CameraControl";
         return;
     }
     m_previewStarted = true;
@@ -134,11 +134,11 @@ void AalVideoRendererControl::stopPreview()
         return;
     }
     if (!m_service->androidControl()) {
-        qWarning() << "Can't stop preview without a CameraControl";
+        qCritical() << "Can't stop preview without a CameraControl";
         return;
     }
     if (!m_surface) {
-        qWarning() << "Can't stop preview without a QAbstractVideoSurface";
+        qCritical() << "Can't stop preview without a QAbstractVideoSurface";
         return;
     }
 
@@ -163,15 +163,15 @@ bool AalVideoRendererControl::isPreviewStarted() const
 void AalVideoRendererControl::updateViewfinderFrame()
 {
     if (!m_service->viewfinderControl()) {
-        qWarning() << "Can't draw video frame without a viewfinder settings control";
+        qCritical() << "Can't draw video frame without a viewfinder settings control";
         return;
     }
     if (!m_service->androidControl()) {
-        qWarning() << "Can't draw video frame without camera";
+        qCritical() << "Can't draw video frame without camera";
         return;
     }
     if (!m_surface) {
-        qWarning() << "Can't draw video frame without surface";
+        qCritical() << "Can't draw video frame without surface";
         return;
     }
 
@@ -179,7 +179,7 @@ void AalVideoRendererControl::updateViewfinderFrame()
     QVideoFrame frame(new AalGLTextureBuffer(m_textureId), vfSize, QVideoFrame::Format_RGB32);
 
     if (!frame.isValid()) {
-        qWarning() << "Invalid frame";
+        qCritical() << "Invalid frame";
         return;
     }
 
@@ -190,7 +190,7 @@ void AalVideoRendererControl::updateViewfinderFrame()
         QVideoSurfaceFormat format(frame.size(), frame.pixelFormat(), frame.handleType());
 
         if (!m_surface->start(format)) {
-            qWarning() << "Failed to start viewfinder with format:" << format;
+            qCritical() << "Failed to start viewfinder with format:" << format;
         }
     }
 
