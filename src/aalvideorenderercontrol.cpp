@@ -114,11 +114,11 @@ void AalVideoRendererControl::startPreview()
     }
     m_previewStarted = true;
 
-   // if (m_textureId) {
+    if (m_textureId) {
         CameraControl *cc = m_service->androidControl();
         android_camera_set_preview_texture(cc, m_textureId);
         android_camera_start_preview(cc);
-    //}
+    }
 
     // if no texture ID is set to the frame passed to ShaderVideoNode,
     // a texture ID will be generated and returned via the 'textureCreated' signal
