@@ -201,4 +201,10 @@ void AalImageCaptureControl::onImageFileSaved()
             Q_EMIT error(requestID, QCameraImageCapture::ResourceError, result.errorMessage);
         }
     }
+
+    // Restart the viewfinder and notify that the camera is ready to capture again
+    if (m_service->androidControl()) {
+        android_camera_stop_preview(m_service->androidControl());
+        android_camera_start_preview(m_service->androidControl());
+    }
 }
