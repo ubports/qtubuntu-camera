@@ -170,10 +170,10 @@ void AalImageCaptureControl::saveJpeg(const QByteArray& data)
     QSize resolution = viewfinder->viewfinderParameter(QCameraViewfinderSettingsControl::Resolution).toSize();
 
     // Restart the viewfinder and notify that the camera is ready to capture again
-    if (m_service->androidControl()) {
-	android_camera_stop_preview(m_service->androidControl());
-        android_camera_start_preview(m_service->androidControl());
-    }
+ //   if (m_service->androidControl()) {
+//	android_camera_stop_preview(m_service->androidControl());
+ //       android_camera_start_preview(m_service->androidControl());
+  //  }
     m_service->updateCaptureReady();
 
     DiskWriteWatcher* watcher = new DiskWriteWatcher(this);
@@ -200,11 +200,5 @@ void AalImageCaptureControl::onImageFileSaved()
         } else {
             Q_EMIT error(requestID, QCameraImageCapture::ResourceError, result.errorMessage);
         }
-    }
-
-    // Restart the viewfinder and notify that the camera is ready to capture again
-    if (m_service->androidControl()) {
-        android_camera_stop_preview(m_service->androidControl());
-        android_camera_start_preview(m_service->androidControl());
     }
 }
