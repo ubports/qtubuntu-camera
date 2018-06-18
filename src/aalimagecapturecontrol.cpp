@@ -203,4 +203,8 @@ void AalImageCaptureControl::onImageFileSaved()
             Q_EMIT error(requestID, QCameraImageCapture::ResourceError, result.errorMessage);
         }
     }
+
+    m_service->stopPreview();
+    m_service->startPreview();
+
 }
