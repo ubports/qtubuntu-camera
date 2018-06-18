@@ -188,6 +188,12 @@ void AalImageCaptureControl::onImageFileSaved()
 {
     DiskWriteWatcher* watcher = static_cast<DiskWriteWatcher*>(sender());
 
+    // Restart the viewfinder and notify that the camera is ready to capture again
+    if (m_service->androidControl()) {
+        android_camera_start_preview(m_service->androidControl());
+    }
+
+
     if (m_pendingSaveOperations.contains(watcher)) {
         int requestID = m_pendingSaveOperations.take(watcher);
 
