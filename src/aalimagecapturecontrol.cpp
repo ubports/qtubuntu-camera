@@ -174,6 +174,8 @@ void AalImageCaptureControl::saveJpeg(const QByteArray& data)
 //	android_camera_stop_preview(m_service->androidControl());
  //       android_camera_start_preview(m_service->androidControl());
   //  }
+    m_service->stopPreview();
+    m_service->startPreview();
     m_service->updateCaptureReady();
 
     DiskWriteWatcher* watcher = new DiskWriteWatcher(this);
