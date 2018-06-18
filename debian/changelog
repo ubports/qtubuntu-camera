@@ -1,4 +1,4 @@
-qtubuntu-camera (0.3.4+ubports1) xenial; urgency=medium
+qtubuntu-camera (0.3.5+ubports0) xenial; urgency=medium
 
   * Fix for https://github.com/ubports/ubuntu-touch/issues/611
 
