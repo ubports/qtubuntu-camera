@@ -80,7 +80,7 @@ int AalImageCaptureControl::capture(const QString &fileName)
     m_captureCancelled = false;
 
     AalMetaDataWriterControl* metadataControl = m_service->metadataWriterControl();
-    int rotation = metadataControl->correctedOrientation();
+    int rotation = metadataControl->orientation();
     android_camera_set_rotation(m_service->androidControl(), rotation);
 
     android_camera_take_snapshot(m_service->androidControl());

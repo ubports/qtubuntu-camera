@@ -467,7 +467,7 @@ int AalMediaRecorderControl::startRecording()
     setParameter(PARAM_AUDIO_CHANNELS, 2);
     setParameter(PARAM_AUTIO_SAMPLING, 96000);
     if (m_service->metadataWriterControl()) {
-        int rotation = m_service->metadataWriterControl()->correctedOrientation();
+        int rotation = m_service->metadataWriterControl()->orientation();
         setParameter(PARAM_ORIENTATION, rotation);
         m_service->metadataWriterControl()->clearAllMetaData();
     }

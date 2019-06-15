@@ -43,7 +43,6 @@ public:
     void setMetaData(const QString & key, const QVariant & value);
 
     int orientation() const;
-    int correctedOrientation() const;
 
     void clearAllMetaData();
 
