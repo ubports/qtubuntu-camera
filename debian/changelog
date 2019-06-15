@@ -1,3 +1,12 @@
+qtubuntu-camera (0.3.5+ubports1) xenial; urgency=medium
+
+  * Properly support camera orientation.
+    - Remove orientation corrections when using front camera.
+    - Invert camera orientation given from Android HAL.
+    - Add a camera orientation override for some devices.
+
+ -- Ratchanan Srirattanamet <peathot@hotmail.com>  Sun, 16 Jun 2019 02:58:36 +0700
+
 qtubuntu-camera (0.3.4+ubports) xenial; urgency=medium
 
   * Imported to UBports
