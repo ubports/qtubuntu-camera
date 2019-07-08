@@ -18,6 +18,7 @@
 
 #include <QCameraInfo>
 #include <QOrientationReading>
+#include <QDebug>
 
 #include "aalcameracontrol.h"
 #include "aalvideodeviceselectorcontrol.h"
@@ -35,6 +36,8 @@ RotationHandler::RotationHandler(AalCameraService *service, QObject *parent):
 
 void RotationHandler::orientationChanged()
 {
+    qDebug() << "Orientation changed: " << m_orientationSensor.reading()->orientation();
+
     switch (m_orientationSensor.reading()->orientation()) {
         case QOrientationReading::Orientation::TopUp:
             m_deviceOrientation = 0;
@@ -86,6 +89,11 @@ int RotationHandler::calculateRotation()
 
     // Ensure rotation is positive
     rotation = (rotation + 360) % 360;
+
+    qDebug() << "Rotation calculated. Camera position = " << cameraInfo.position()
+                                 << " Camera orientation = " << cameraInfo.orientation()
+                                 << " Device orientation = " << m_deviceOrientation
+                                 << " Final rotation = " << rotation;
 
     return rotation;
 }
