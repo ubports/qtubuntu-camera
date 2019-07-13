@@ -20,6 +20,9 @@
 #include <QString>
 #include <QDebug>
 #include <QMetaType>
+#include <QGuiApplication>
+#include <QScreen>
+#include <QtGlobal>
 #include <qgl.h>
 
 #include <hybris/properties/properties.h>
@@ -37,8 +40,39 @@ static QString getAndroidDeviceCodename() {
     return QString(deviceCodename);
 }
 
+void AalServicePlugin::calculateScreenRotationOffset() {
+    // Camera orientation is calculated from device's native orientation. However, the actual
+    // native orientation might be different from screen's native orientation. This function
+    // calculate the rotation of the screen from the device's native orientation, so that we
+    // can calculate camera's orientation relative to the screen.
+    //
+    // This is qtubuntu specific and is bound to break. The proper fix would be making the
+    // screen's native orientation matches the device's native orientation. However, the
+    // whole qtmir/unity8/qtubuntu stack is too confusing to understand. So, this is the best
+    // I can to right now.
+
+    QGuiApplication *app = qGuiApp;
+    if (!app) {
+        qDebug() << "QGuiApplication is not available, not calculating screen rotation offset.";
+        m_screenRotationOffset = 0;
+        return;
+    }
+
+    Qt::ScreenOrientation screenNativeOrientation = app->primaryScreen()->nativeOrientation();
+    // Here, I trust this environment variable to be the "correct" device orientation.
+    QString envNativeOrientation = qgetenv("NATIVE_ORIENTATION");
+
+    if (screenNativeOrientation == Qt::PortraitOrientation && envNativeOrientation == "landscape")
+        m_screenRotationOffset = 270;
+    else if (screenNativeOrientation == Qt::LandscapeOrientation && envNativeOrientation == "portrait")
+        m_screenRotationOffset = 90;
+    else
+        m_screenRotationOffset = 0;
+}
+
 AalServicePlugin::AalServicePlugin()
 {
+    calculateScreenRotationOffset();
 }
 
 QMediaService* AalServicePlugin::create(QString const& key)
@@ -132,8 +166,17 @@ int AalServicePlugin::cameraOrientation(const QByteArray & device) const
     // On Android, it means "the angle that the camera image needs to be
     // rotated", but on QT, it means "the physical orientation of the camera
     // sensor". So, the value will have to be inverted.
+    int qtOrientation = -orientation;
 
-    return (360 - orientation) % 360;
+    // Calculate camera orientation relative to the screen.
+    if (facing == BACK_FACING_CAMERA_TYPE)
+        qtOrientation -= m_screenRotationOffset;
+    else
+        // Clockwise screen become counter-clockwise camera
+        qtOrientation += m_screenRotationOffset;
+
+    // Make sure the orientation is positive.
+    return (qtOrientation + 720) % 360;
 }
 
 QCamera::Position AalServicePlugin::cameraPosition(const QByteArray & device) const
