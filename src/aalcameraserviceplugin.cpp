@@ -18,6 +18,7 @@
 #include "aalcameraservice.h"
 
 #include <QString>
+#include <QHash>
 #include <QDebug>
 #include <QMetaType>
 #include <qgl.h>
@@ -25,17 +26,6 @@
 #include <hybris/properties/properties.h>
 #include <hybris/camera/camera_compatibility_layer.h>
 #include <hybris/camera/camera_compatibility_layer_capabilities.h>
-
-static QString getAndroidDeviceCodename() {
-    char deviceCodename[PROP_VALUE_MAX];
-
-    int length = property_get("ro.product.device", deviceCodename, "");
-    if (length <= 0) {
-        return QString();
-    }
-
-    return QString(deviceCodename);
-}
 
 AalServicePlugin::AalServicePlugin()
 {
@@ -96,10 +86,39 @@ QString AalServicePlugin::deviceDescription(const QByteArray &service, const QBy
     }
 }
 
+// krillin / vegetahd lies to us - the top of the front facing camera
+// points to the right of the screen (viewed from the front), which means
+// the camera image needs rotating by 270deg with the device in its natural
+// orientation (portrait). It tells us the camera orientation is 90deg
+// though (see https://launchpad.net/bugs/1567542)
+// https://git.launchpad.net/oxide/tree/shared/browser/media/oxide_video_capture_device_hybris.cc#n92
+
+// This map contains all overrides we have. The format for the key is
+// "<device codename>_<camera_id>" where the camera id is usually "0" for back
+// facing camera and "1" for front facing one. The value contains the orientation
+// we would return (in Qt convention i.e. no conversion required).
+static const QHash<QString, int> cameraOrientationOverride = {
+    {"krillin_1", 90},
+    {"vegetahd_1", 90},
+};
+
+static QString getCameraOrientationOverrideKey(const QString & cameraId) {
+    char deviceCodename[PROP_VALUE_MAX];
+
+    int length = property_get("ro.product.device", deviceCodename, "");
+    if (length <= 0) {
+        return QString();
+    }
+
+    return QString("%1_%2").arg(deviceCodename).arg(cameraId);
+}
+
 int AalServicePlugin::cameraOrientation(const QByteArray & device) const
 {
-    int facing;
-    int orientation;
+    QString cameraOrientationOverrideKey = getCameraOrientationOverrideKey(device);
+    if (cameraOrientationOverride.contains(cameraOrientationOverrideKey)) {
+        return cameraOrientationOverride.value(cameraOrientationOverrideKey);
+    }
 
     bool ok;
     int deviceID = device.toInt(&ok, 10);
@@ -107,25 +126,12 @@ int AalServicePlugin::cameraOrientation(const QByteArray & device) const
         return 0;
     }
 
+    int facing;
+    int orientation;
+
     int result = android_camera_get_device_info(deviceID, &facing, &orientation);
     if (result != 0) {
         return 0;
-    }
-
-    if (facing == FRONT_FACING_CAMERA_TYPE) {
-        QString deviceCodename = getAndroidDeviceCodename();
-
-        if (deviceCodename == "krillin" || deviceCodename == "vegetahd") {
-            // krillin / vegetahd lies to us - the top of the front facing camera
-            // points to the right of the screen (viewed from the front), which means
-            // the camera image needs rotating by 270deg with the device in its natural
-            // orientation (portrait). It tells us the camera orientation is 90deg
-            // though (see https://launchpad.net/bugs/1567542)
-            // https://git.launchpad.net/oxide/tree/shared/browser/media/oxide_video_capture_device_hybris.cc#n92
-
-            // FIXME: is this the right place to do this?
-            orientation = 270;
-        }
     }
 
     // Android's orientation means differently compared to QT's orientation.
