@@ -93,6 +93,13 @@ QString AalServicePlugin::deviceDescription(const QByteArray &service, const QBy
 // though (see https://launchpad.net/bugs/1567542)
 // https://git.launchpad.net/oxide/tree/shared/browser/media/oxide_video_capture_device_hybris.cc#n92
 
+// Meanwhile, cooler (M10 HD) gives the orientation of 0 for all cameras while
+// actually has its cameras pointing toward the "bottom" of the device.
+// Except, both the screen and the orientation sensor agrees that the native
+// orientation is "portrait", not the apparent "landscape". This means the
+// back camera's returned orientation must be 270 deg (Qt convention), while
+// the front one's must be 90.
+
 // This map contains all overrides we have. The format for the key is
 // "<device codename>_<camera_id>" where the camera id is usually "0" for back
 // facing camera and "1" for front facing one. The value contains the orientation
@@ -100,6 +107,8 @@ QString AalServicePlugin::deviceDescription(const QByteArray &service, const QBy
 static const QHash<QString, int> cameraOrientationOverride = {
     {"krillin_1", 90},
     {"vegetahd_1", 90},
+    {"cooler_0", 270},
+    {"cooler_1", 90},
 };
 
 static QString getCameraOrientationOverrideKey(const QString & cameraId) {
