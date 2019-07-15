@@ -1,3 +1,10 @@
+qtubuntu-camera (0.4.2+ubports0) xenial; urgency=medium
+
+  * Turns orientation override into proper hashmap.
+  * Add orientation override for cooler (M10 HD).
+
+ -- Ratchanan Srirattanamet <peathot@hotmail.com>  Mon, 15 Jul 2019 23:43:47 +0700
+
 qtubuntu-camera (0.4.1+ubports0) xenial; urgency=medium
 
   * Prevent AudioCapture from sending late samples into /dev/socket/micshm,
