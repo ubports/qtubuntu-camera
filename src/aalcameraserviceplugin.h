@@ -18,6 +18,7 @@
 #define AALSERVICEPLUGIN_H
 
 #include <QMediaServiceProviderPlugin>
+#include <QVector>
 
 class AalServicePlugin : public QMediaServiceProviderPlugin,
                          public QMediaServiceSupportedDevicesInterface,
@@ -38,6 +39,9 @@ public:
     QString deviceDescription(const QByteArray &service, const QByteArray &device);
     int cameraOrientation(const QByteArray & device) const;
     QCamera::Position cameraPosition(const QByteArray & device) const;
+
+private:
+    QVector<int> m_orientationOverrides;
 };
 
 #endif

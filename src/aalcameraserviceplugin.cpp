@@ -17,16 +17,47 @@
 #include "aalcameraserviceplugin.h"
 #include "aalcameraservice.h"
 
+#include <QString>
+#include <QStringList>
+#include <QVector>
 #include <QDebug>
 #include <QMetaType>
 #include <qgl.h>
 
+#include <hybris/properties/properties.h>
 #include <hybris/camera/camera_compatibility_layer.h>
 #include <hybris/camera/camera_compatibility_layer_capabilities.h>
 
+#define CAMERA_ORIENTATION_OVERRIDES_KEY "aal.camera.orientations"
 
-AalServicePlugin::AalServicePlugin()
+AalServicePlugin::AalServicePlugin():
+    m_orientationOverrides(/* size */ 0)
 {
+    // Read orientation override from Android property
+    char orientationOverridesCStr[PROP_VALUE_MAX];
+
+    int length = property_get(CAMERA_ORIENTATION_OVERRIDES_KEY, orientationOverridesCStr, "");
+    if (length <= 0) {
+        return;
+    }
+
+    // Override string is a list of each camera's orientation, separated by a comma (',').
+    // The orientaion must be in Qt convention (no conversion will be done), and should be
+    // either 0, 90, 180 or 270.
+
+    QStringList orientationOverrides = QString(orientationOverridesCStr).split(',');
+    m_orientationOverrides.resize(orientationOverrides.size());
+
+    for (int i = 0; i<orientationOverrides.size(); i++) {
+        bool ok;
+        int override = orientationOverrides[i].toInt(&ok, /* base */ 10);
+
+        if (!ok) {
+            override = -1;
+        }
+
+        m_orientationOverrides[i] = override;
+    }
 }
 
 QMediaService* AalServicePlugin::create(QString const& key)
@@ -93,6 +124,14 @@ int AalServicePlugin::cameraOrientation(const QByteArray & device) const
     int deviceID = device.toInt(&ok, 10);
     if (!ok) {
         return 0;
+    }
+
+    // Check the override
+    if (deviceID < m_orientationOverrides.size()) {
+        int override = m_orientationOverrides[deviceID];
+        if (override != -1) {
+            return override;
+        }
     }
 
     int result = android_camera_get_device_info(deviceID, &facing, &orientation);
