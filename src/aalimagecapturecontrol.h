@@ -80,6 +80,7 @@ private:
     QString m_galleryPath;
     QMediaPlayer *m_audioPlayer;
     QSettings m_settings;
+    std::string m_deviceName;
 
     QMap<DiskWriteWatcher*, int> m_pendingSaveOperations;
 };

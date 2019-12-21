@@ -14,6 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "aalcameracontrol.h"
 #include "aalcameraservice.h"
 #include "aalimagecapturecontrol.h"
 #include "aalimageencodercontrol.h"
@@ -25,6 +26,8 @@
 
 #include <hybris/camera/camera_compatibility_layer.h>
 #include <hybris/camera/camera_compatibility_layer_capabilities.h>
+
+#include <hybris/properties/properties.h>
 
 #include <QDir>
 #include <QObject>
@@ -53,6 +56,10 @@ AalImageCaptureControl::AalImageCaptureControl(AalCameraService *service, QObjec
     m_galleryPath = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
     m_audioPlayer->setMedia(QUrl::fromLocalFile("/system/media/audio/ui/camera_click.ogg"));
     m_audioPlayer->setAudioRole(QAudio::NotificationRole);
+
+    char name[PROP_VALUE_MAX] = "";
+    property_get("ro.product.device", name, "");
+    m_deviceName = name;
 
     QObject::connect(&m_storageManager, &StorageManager::previewReady,
                      this, &AalImageCaptureControl::imageCaptured);
@@ -172,7 +179,13 @@ void AalImageCaptureControl::saveJpeg(const QByteArray& data)
 
     // Restart the viewfinder and notify that the camera is ready to capture again
     if (m_service->androidControl()) {
-        android_camera_start_preview(m_service->androidControl());
+        // SUPER HACK! completly destroy and recreate camera hal to restart preview
+        if (m_deviceName == "hammerhead") {
+            emit m_service->cameraControl()->setState(QCamera::UnloadedState);
+            emit m_service->cameraControl()->setState(QCamera::ActiveState);
+        } else {
+            android_camera_start_preview(m_service->androidControl());
+        }
     }
     m_service->updateCaptureReady();
 
