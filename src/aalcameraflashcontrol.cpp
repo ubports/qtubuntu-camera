@@ -77,8 +77,8 @@ FlashMode AalCameraFlashControl::qt2Android(QCameraExposure::FlashModes mode)
         return FLASH_MODE_ON;
     case QCameraExposure::FlashRedEyeReduction:
         return FLASH_MODE_RED_EYE;
-    case QCameraExposure::FlashFill:
-        return FLASH_MODE_FILL;
+    // case QCameraExposure::FlashFill:
+    //     return FLASH_MODE_FILL;
     case QCameraExposure::FlashVideoLight:
     case QCameraExposure::FlashTorch:
         return FLASH_MODE_TORCH;
@@ -97,8 +97,8 @@ QCameraExposure::FlashModes AalCameraFlashControl::android2Qt(FlashMode mode)
         return QCameraExposure::FlashVideoLight;
     case FLASH_MODE_RED_EYE:
         return QCameraExposure::FlashRedEyeReduction;
-    case FLASH_MODE_FILL:
-        return QCameraExposure::FlashFill;
+    // case FLASH_MODE_FILL:
+    //     return QCameraExposure::FlashFill;
     case FLASH_MODE_AUTO:
         return QCameraExposure::FlashAuto;
     case FLASH_MODE_OFF:
