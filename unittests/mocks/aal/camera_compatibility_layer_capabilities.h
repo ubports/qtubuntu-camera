@@ -29,6 +29,7 @@ typedef enum
 {
     FLASH_MODE_OFF,
     FLASH_MODE_AUTO,
+    FLASH_MODE_RED_EYE,
     FLASH_MODE_ON,
     FLASH_MODE_TORCH
 } FlashMode;
@@ -39,7 +40,7 @@ typedef enum
     WHITE_BALANCE_MODE_DAYLIGHT,
     WHITE_BALANCE_MODE_CLOUDY_DAYLIGHT,
     WHITE_BALANCE_MODE_FLUORESCENT,
-    WHITE_BALANCE_MODE_INCANDESCENT        
+    WHITE_BALANCE_MODE_INCANDESCENT
 } WhiteBalanceMode;
 
 typedef enum
@@ -135,7 +136,7 @@ void android_camera_get_preview_format(CameraControl* control, CameraPixelFormat
 void android_camera_get_jpeg_quality(struct CameraControl* control, int* quality);
 
 // Adjusts camera parameters
-void android_camera_set_preview_size(CameraControl* control, int width, int height); 
+void android_camera_set_preview_size(CameraControl* control, int width, int height);
 void android_camera_set_preview_fps(CameraControl* control, int fps);
 void android_camera_set_picture_size(CameraControl* control, int width, int height);
 void android_camera_set_effect_mode(CameraControl* control, EffectMode mode);
