@@ -29,9 +29,9 @@ typedef enum
 {
     FLASH_MODE_OFF,
     FLASH_MODE_AUTO,
-    FLASH_MODE_RED_EYE,
     FLASH_MODE_ON,
-    FLASH_MODE_TORCH
+    FLASH_MODE_TORCH,
+    FLASH_MODE_RED_EYE
 } FlashMode;
 
 typedef enum
