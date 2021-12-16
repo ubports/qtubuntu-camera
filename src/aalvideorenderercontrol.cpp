@@ -52,8 +52,10 @@ public:
         const int width = m_width;
         const int height = m_height;
 
-        if (m_pixelBuffer)
+        if (m_pixelBuffer) {
             delete[] m_pixelBuffer;
+            m_pixelBuffer = nullptr;
+        }
         glBindTexture(GL_TEXTURE_2D, m_textureId);
 
         m_pixelBuffer = new uint8_t[width * height * 4];
@@ -69,8 +71,10 @@ public:
     void unmap()
     {
         glBindTexture(GL_TEXTURE_2D, 0);
-        if (m_pixelBuffer)
+        if (m_pixelBuffer) {
             delete[] m_pixelBuffer;
+            m_pixelBuffer = nullptr;
+        }
     }
 
     QVariant handle() const
