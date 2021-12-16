@@ -32,25 +32,45 @@
 class AalGLTextureBuffer : public QAbstractVideoBuffer
 {
 public:
-    AalGLTextureBuffer(GLuint textureId) :
+    AalGLTextureBuffer(GLuint textureId, int width, int height) :
         QAbstractVideoBuffer(QAbstractVideoBuffer::GLTextureHandle),
-        m_textureId(textureId)
+        m_textureId(textureId),
+        m_mapMode(NotMapped),
+        m_width(width),
+        m_height(height)
     {
     }
 
-    MapMode mapMode() const { return NotMapped; }
+    MapMode mapMode() const { return m_mapMode; }
     uchar *map(MapMode mode, int *numBytes, int *bytesPerLine)
     {
-        qDebug() << Q_FUNC_INFO;
-        Q_UNUSED(mode);
-        Q_UNUSED(numBytes);
-        Q_UNUSED(bytesPerLine);
-        return (uchar*)0;
+        if (mode != MapMode::ReadOnly) {
+            qWarning() << "Tried to map in invalid mode:" << mode;
+            return (uchar*)0;
+        }
+
+        const int width = m_width;
+        const int height = m_height;
+
+        if (m_pixelBuffer)
+            delete[] m_pixelBuffer;
+        glBindTexture(GL_TEXTURE_2D, m_textureId);
+
+        m_pixelBuffer = new uint8_t[width * height * 4];
+
+        glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, m_pixelBuffer);
+
+        m_mapMode = mode;
+        *numBytes = width * height * 4;
+        *bytesPerLine = width * 4;
+        return (uchar*)m_pixelBuffer;
     }
 
     void unmap()
     {
-        qDebug() << Q_FUNC_INFO;
+        glBindTexture(GL_TEXTURE_2D, 0);
+        if (m_pixelBuffer)
+            delete[] m_pixelBuffer;
     }
 
     QVariant handle() const
@@ -62,6 +82,10 @@ public:
 
 private:
     GLuint m_textureId;
+    int m_width;
+    int m_height;
+    MapMode m_mapMode;
+    uint8_t* m_pixelBuffer = nullptr;
 };
 
 
@@ -176,7 +200,9 @@ void AalVideoRendererControl::updateViewfinderFrame()
     }
 
     QSize vfSize = m_service->viewfinderControl()->currentSize();
-    QVideoFrame frame(new AalGLTextureBuffer(m_textureId), vfSize, QVideoFrame::Format_RGB32);
+    QVideoFrame frame(new AalGLTextureBuffer(m_textureId,
+                                             vfSize.width(), vfSize.height()),
+                      vfSize, QVideoFrame::Format_RGB32);
 
     if (!frame.isValid()) {
         qWarning() << "Invalid frame";
